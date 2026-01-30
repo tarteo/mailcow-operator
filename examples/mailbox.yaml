@@ -1,0 +1,14 @@
+apiVersion: mailcow.onestein.nl/v1
+kind: Mailbox
+metadata:
+  name: example-mailbox
+spec:
+  mailcow: example-mailcow
+  domain: example.com
+  localPart: "user"
+  name: "mr. example"
+  passwordSecret:
+    name: mailbox-password-secret
+    key: password
+  quota: 500
+  active: true

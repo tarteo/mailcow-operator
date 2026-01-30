@@ -1,0 +1,6 @@
+apiVersion: v2
+name: mailcow-operator
+description: Kubernetes Operator for Mailcow objects
+type: application
+version: 1.0.0
+appVersion: "v1.0.0"

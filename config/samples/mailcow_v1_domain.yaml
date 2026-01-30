@@ -1,0 +1,16 @@
+apiVersion: mailcow.onestein.nl/v1
+kind: Domain
+metadata:
+  labels:
+    app.kubernetes.io/name: mailcow-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: domain-sample
+spec:
+  mailcow: example-mailcow
+  domain: "example.com"
+  description: "Example Domain"
+  quota: 1000
+  defQuota: 500
+  maxQuota: 500
+  active: true
+  maxMailboxes: 60

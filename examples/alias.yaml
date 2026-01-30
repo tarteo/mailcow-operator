@@ -1,0 +1,9 @@
+apiVersion: mailcow.onestein.nl/v1
+kind: Alias
+metadata:
+  name: example-alias
+spec:
+  mailcow: example-mailcow
+  address: "@example.com" # Catch-all alias
+  goTo: "user@example.com"
+  active: true

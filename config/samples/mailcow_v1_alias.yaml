@@ -1,0 +1,12 @@
+apiVersion: mailcow.onestein.nl/v1
+kind: Alias
+metadata:
+  labels:
+    app.kubernetes.io/name: mailcow-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: alias-sample
+spec:
+  mailcow: example-mailcow
+  address: "@example.com" # Catch-all alias
+  goTo: "user@example.com"
+  active: true

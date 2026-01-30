@@ -1,0 +1,9 @@
+apiVersion: mailcow.onestein.nl/v1
+kind: Mailcow
+metadata:
+  name: example-mailcow
+spec:
+  endpoint: "https://mail.example.com"
+  secret:
+    name: mailcow-credentials
+    key: apiToken

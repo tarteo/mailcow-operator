@@ -1,0 +1,13 @@
+apiVersion: mailcow.onestein.nl/v1
+kind: Domain
+metadata:
+  name: example-domain
+spec:
+  mailcow: example-mailcow
+  domain: "example.com"
+  description: "Example Domain"
+  quota: 1000
+  defQuota: 500
+  maxQuota: 500
+  active: true
+  maxMailboxes: 60

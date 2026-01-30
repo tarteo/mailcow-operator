@@ -1,0 +1,12 @@
+apiVersion: mailcow.onestein.nl/v1
+kind: Mailcow
+metadata:
+  labels:
+    app.kubernetes.io/name: mailcow-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: mailcow-sample
+spec:
+  endpoint: "https://mail.example.com"
+  secret:
+    name: mailcow-credentials
+    key: apiToken

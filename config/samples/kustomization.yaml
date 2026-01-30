@@ -1,0 +1,8 @@
+## Append samples of your project ##
+resources:
+- mailcow_v1_mailcow.yaml
+- mailcow_v1_domain.yaml
+- mailcow_v1_mailbox.yaml
+- mailcow_v1_domainadmin.yaml
+- mailcow_v1_alias.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples

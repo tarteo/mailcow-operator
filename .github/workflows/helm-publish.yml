@@ -1,0 +1,69 @@
+name: Helm Chart Publish
+
+on:
+  push:
+    paths:
+      - 'helm/chart/Chart.yaml'
+      - 'helm/chart/**'
+    branches:
+      - main
+
+jobs:
+  lint-and-publish:
+    name: Lint and Publish Helm Chart
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Set up Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'latest'
+
+      - name: Add Helm repository dependencies
+        run: |
+          cd helm/chart
+          helm dependency update 2>/dev/null || true
+
+      - name: Lint Helm chart
+        run: |
+          cd helm/chart
+          helm lint .
+
+      - name: Package Helm chart
+        id: package
+        run: |
+          mkdir -p chart-releases
+          cd helm/chart
+          CHART_VERSION=$(grep '^version:' Chart.yaml | awk '{print $2}')
+          echo "chart_version=${CHART_VERSION}" >> $GITHUB_OUTPUT
+          helm package . -d ../../chart-releases
+          echo "chart_file=$(ls ../../chart-releases/*.tgz | head -n1)" >> $GITHUB_OUTPUT
+
+      - name: Checkout gh-pages branch
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Update Helm repository index
+        run: |
+          cd gh-pages
+          helm repo index . --url https://tarteo.github.io/mailcow-operator/
+          cd ..
+
+      - name: Copy chart to gh-pages
+        run: |
+          cp chart-releases/*.tgz gh-pages/
+          cd gh-pages
+          helm repo index . --url https://tarteo.github.io/mailcow-operator/
+
+      - name: Commit and push to gh-pages
+        run: |
+          cd gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .
+          git diff --quiet && git diff --staged --quiet || git commit -m "Publish Helm chart v${{ steps.package.outputs.chart_version }}"
+          git push

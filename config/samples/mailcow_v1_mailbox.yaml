@@ -1,0 +1,17 @@
+apiVersion: mailcow.onestein.nl/v1
+kind: Mailbox
+metadata:
+  labels:
+    app.kubernetes.io/name: mailcow-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: mailbox-sample
+spec:
+  mailcow: example-mailcow
+  domain: example.com
+  localPart: "user"
+  name: "mr. example"
+  passwordSecret:
+    name: mailbox-password-secret
+    key: password
+  quota: 500
+  active: true

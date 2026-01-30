@@ -1,0 +1,21 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "chart.fullname" . }}-domainadmin-viewer-role
+  labels:
+  {{- include "chart.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - mailcow.onestein.nl
+  resources:
+  - domainadmins
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - mailcow.onestein.nl
+  resources:
+  - domainadmins/status
+  verbs:
+  - get

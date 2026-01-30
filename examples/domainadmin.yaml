@@ -1,0 +1,14 @@
+apiVersion: mailcow.onestein.nl/v1
+kind: DomainAdmin
+metadata:
+  name: example-domainadmin
+spec:
+  mailcow: example-mailcow
+  username: "test-example"
+  passwordSecret:
+    name: domainadmin-password-secret
+    key: password
+  domains:
+    - example.com
+    - example2.com
+  active: true

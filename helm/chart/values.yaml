@@ -10,8 +10,8 @@ controllerManager:
         drop:
         - ALL
     image:
-      repository: controller
-      tag: latest
+      repository: ghcr.io/tarteo/mailcow-operator
+      tag: v1.0.0
     resources:
       limits:
         cpu: 500m

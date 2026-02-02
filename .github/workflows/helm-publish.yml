@@ -2,9 +2,9 @@ name: Helm Chart Publish
 
 on:
   push:
-    paths:
-      - 'helm/chart/Chart.yaml'
-      - 'helm/chart/**'
+    # paths:
+    #   - 'helm/chart/Chart.yaml'
+    #   - 'helm/chart/**'
     branches:
       - main
 
@@ -16,6 +16,9 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
       - name: Set up Helm
         uses: azure/setup-helm@v3
         with:

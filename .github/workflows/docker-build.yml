@@ -29,4 +29,3 @@ jobs:
         with:
           tags: ghcr.io/tarteo/mailcow-operator:latest,ghcr.io/tarteo/mailcow-operator:${{ github.ref_name }}
           push: true
-        

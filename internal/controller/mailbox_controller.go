@@ -156,12 +156,12 @@ func (r *MailboxReconciler) ReconcileResource(ctx context.Context, client *mailc
 		// Mailbox exists, update it
 		_, err = client.UpdateMailboxWithResponse(ctx, mailcow.UpdateMailboxJSONRequestBody{
 			Attr: &mailcow.EditMailboxAttr{
-				Name:          &mailbox.Spec.Name,
-				Password:      &password,
-				Password2:     &password,
-				Active:        mailbox.Spec.Active,
-				ForcePwUpdate: mailbox.Spec.ForcePasswordChange,
-				Quota:         helpers.Int64ToFloat32(mailbox.Spec.Quota),
+				// Name: &mailbox.Spec.Name,
+				// Password:      &password, // Should we always update the password? assuming someone might want to change it
+				// Password2:     &password,
+				Active: mailbox.Spec.Active,
+				// ForcePwUpdate: mailbox.Spec.ForcePasswordChange,
+				Quota: helpers.Int64ToFloat32(mailbox.Spec.Quota),
 			},
 			Items: &[]string{email},
 		})

@@ -167,4 +167,5 @@ oapi-codegen --config=mailcow/oapi-codegen.yaml mailcow/openapi.yaml
 - Allow multiple goto addresses in aliases
 - Make the created DKIM ConfigMap name configurable
 - Add an option to force the password of mailbox resources to be updated on each reconciliation according to the secret
+- Add an option to force the password and name of mailboxes to be updated on each reconciliation according to the secret and spec
 - Add support for multiple mailcow versions

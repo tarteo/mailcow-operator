@@ -147,7 +147,7 @@ components:
           type: string
         rl_value:
           description: rate limit value
-          type: number
+          type: integer
         tags:
           description: tags for this Domain
           type: array
@@ -357,7 +357,7 @@ components:
           type: string
         rl_value:
           description: contains the rate for the ratelimit 10,20,50,1
-          type: number
+          type: integer
     EditRatelimitDomainAttr:
       type: object
       properties:
@@ -366,7 +366,7 @@ components:
           type: string
         rl_value:
           description: contains the rate for the ratelimit 10,20,50,1
-          type: number
+          type: integer
     EditCorsAttr:
       type: object
       properties:
@@ -856,10 +856,6 @@ paths:
                 items:
                   type: object
                   properties:
-                    msg:
-                      items:
-                        type: string
-                      type: array
                     type:
                       enum:
                         - success
@@ -946,7 +942,7 @@ paths:
                   type: string
                 rl_value:
                   description: rate limit value
-                  type: number
+                  type: integer
                 tags:
                   description: tags for this Domain
                   type: array
@@ -3291,13 +3287,6 @@ paths:
                 items:
                   type: object
                   properties:
-                    log:
-                      type: array
-                      description: contains request object
-                      items: {}
-                    msg:
-                      type: array
-                      items: {}
                     type:
                       enum:
                         - success
@@ -4433,8 +4422,6 @@ paths:
                     type: number
                   relayhost:
                     type: string
-                  rl:
-                    type: boolean
                   tags:
                     type: array
                     items:
@@ -5820,13 +5807,6 @@ paths:
                         - domain.tld
               schema:
                 properties:
-                  log:
-                    description: contains request object
-                    items: {}
-                    type: array
-                  msg:
-                    items: {}
-                    type: array
                   type:
                     enum:
                       - success
@@ -5856,7 +5836,9 @@ paths:
                   $ref: "#/components/schemas/EditRatelimitDomainAttr"
                 items:
                   description: contains list of domains you want to edit the ratelimit of
-                  type: object
+                  type: array
+                  items:
+                    type: string
               type: object
       summary: Edit domain ratelimits
   /api/v1/get/status/containers:

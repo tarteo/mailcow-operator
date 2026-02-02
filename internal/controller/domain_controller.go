@@ -129,6 +129,7 @@ func (r *DomainReconciler) ReconcileResource(ctx context.Context, client *mailco
 
 	if response.JSON200.DomainName == nil {
 		// Domain does not exist, create it
+		var rlFrame = mailcow.CreateDomainJSONBodyRlFrame(domain.Spec.RateLimitFrame)
 		_, err = client.CreateDomainWithResponse(ctx, mailcow.CreateDomainJSONRequestBody{
 			Domain:      &domain.Spec.Domain,
 			Description: &domain.Spec.Description,
@@ -137,6 +138,8 @@ func (r *DomainReconciler) ReconcileResource(ctx context.Context, client *mailco
 			Maxquota:    helpers.Int64ToFloat32(&domain.Spec.MaxQuota),
 			Active:      domain.Spec.Active,
 			Mailboxes:   helpers.Int64ToFloat32(&domain.Spec.MaxMailboxes),
+			RlValue:     domain.Spec.RateLimit,
+			RlFrame:     &rlFrame,
 		})
 	} else {
 		// Domain exists, update it
@@ -151,6 +154,17 @@ func (r *DomainReconciler) ReconcileResource(ctx context.Context, client *mailco
 			},
 			Items: &[]string{domain.Spec.Domain},
 		})
+
+		if err == nil {
+			// Update rate limits, the main update endpoint doesn't handle rate limits
+			_, err = client.EditDomainRatelimits(ctx, mailcow.EditDomainRatelimitsJSONRequestBody{
+				Attr: &mailcow.EditRatelimitDomainAttr{
+					RlValue: domain.Spec.RateLimit,
+					RlFrame: &domain.Spec.RateLimitFrame,
+				},
+				Items: &[]string{domain.Spec.Domain},
+			})
+		}
 	}
 
 	if err != nil {

@@ -11,3 +11,5 @@ spec:
   maxQuota: 500
   active: true
   maxMailboxes: 60
+  rateLimit: 100
+  rateLimitFrame: "s"

@@ -265,7 +265,7 @@ type EditDomainAttr struct {
 	RlFrame   *EditDomainAttrRlFrame `json:"rl_frame,omitempty"`
 
 	// RlValue rate limit value
-	RlValue *float32 `json:"rl_value,omitempty"`
+	RlValue *int `json:"rl_value,omitempty"`
 
 	// Tags tags for this Domain
 	Tags *[]string `json:"tags,omitempty"`
@@ -400,7 +400,7 @@ type EditRatelimitDomainAttr struct {
 	RlFrame *string `json:"rl_frame,omitempty"`
 
 	// RlValue contains the rate for the ratelimit 10,20,50,1
-	RlValue *float32 `json:"rl_value,omitempty"`
+	RlValue *int `json:"rl_value,omitempty"`
 }
 
 // EditRatelimitMailboxAttr defines model for EditRatelimitMailboxAttr.
@@ -409,7 +409,7 @@ type EditRatelimitMailboxAttr struct {
 	RlFrame *string `json:"rl_frame,omitempty"`
 
 	// RlValue contains the rate for the ratelimit 10,20,50,1
-	RlValue *float32 `json:"rl_value,omitempty"`
+	RlValue *int `json:"rl_value,omitempty"`
 }
 
 // EditSyncJobAttr defines model for EditSyncJobAttr.
@@ -611,7 +611,7 @@ type CreateDomainJSONBody struct {
 	RlFrame     *CreateDomainJSONBodyRlFrame `json:"rl_frame,omitempty"`
 
 	// RlValue rate limit value
-	RlValue *float32 `json:"rl_value,omitempty"`
+	RlValue *int `json:"rl_value,omitempty"`
 
 	// Tags tags for this Domain
 	Tags *[]string `json:"tags,omitempty"`
@@ -1064,7 +1064,7 @@ type EditDomainRatelimitsJSONBody struct {
 	Attr *EditRatelimitDomainAttr `json:"attr,omitempty"`
 
 	// Items contains list of domains you want to edit the ratelimit of
-	Items *map[string]interface{} `json:"items,omitempty"`
+	Items *[]string `json:"items,omitempty"`
 }
 
 // EditMailboxRatelimitsJSONBody defines parameters for EditMailboxRatelimits.
@@ -8306,7 +8306,6 @@ type CreateDomainResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *[]struct {
-		Msg  *[]string            `json:"msg,omitempty"`
 		Type *CreateDomain200Type `json:"type,omitempty"`
 	}
 	JSON401 *Unauthorized
@@ -9351,9 +9350,6 @@ type UpdateDomainResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *[]struct {
-		// Log contains request object
-		Log  *[]interface{}       `json:"log,omitempty"`
-		Msg  *[]interface{}       `json:"msg,omitempty"`
 		Type *UpdateDomain200Type `json:"type,omitempty"`
 	}
 	JSON401 *Unauthorized
@@ -9591,9 +9587,6 @@ type EditDomainRatelimitsResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
 	JSON200      *struct {
-		// Log contains request object
-		Log  *[]interface{}               `json:"log,omitempty"`
-		Msg  *[]interface{}               `json:"msg,omitempty"`
 		Type *EditDomainRatelimits200Type `json:"type,omitempty"`
 	}
 	JSON401 *Unauthorized
@@ -9914,7 +9907,6 @@ type GetDomainsResponse struct {
 		QuotaUsedInDomain      *string   `json:"quota_used_in_domain,omitempty"`
 		RelayAllRecipients     *float32  `json:"relay_all_recipients,omitempty"`
 		Relayhost              *string   `json:"relayhost,omitempty"`
-		Rl                     *bool     `json:"rl,omitempty"`
 		Tags                   *[]string `json:"tags,omitempty"`
 	}
 	JSON401 *Unauthorized
@@ -12460,7 +12452,6 @@ func ParseCreateDomainResponse(rsp *http.Response) (*CreateDomainResponse, error
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest []struct {
-			Msg  *[]string            `json:"msg,omitempty"`
 			Type *CreateDomain200Type `json:"type,omitempty"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
@@ -13841,9 +13832,6 @@ func ParseUpdateDomainResponse(rsp *http.Response) (*UpdateDomainResponse, error
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest []struct {
-			// Log contains request object
-			Log  *[]interface{}       `json:"log,omitempty"`
-			Msg  *[]interface{}       `json:"msg,omitempty"`
 			Type *UpdateDomain200Type `json:"type,omitempty"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
@@ -14152,9 +14140,6 @@ func ParseEditDomainRatelimitsResponse(rsp *http.Response) (*EditDomainRatelimit
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
 		var dest struct {
-			// Log contains request object
-			Log  *[]interface{}               `json:"log,omitempty"`
-			Msg  *[]interface{}               `json:"msg,omitempty"`
 			Type *EditDomainRatelimits200Type `json:"type,omitempty"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
@@ -14570,7 +14555,6 @@ func ParseGetDomainsResponse(rsp *http.Response) (*GetDomainsResponse, error) {
 			QuotaUsedInDomain      *string   `json:"quota_used_in_domain,omitempty"`
 			RelayAllRecipients     *float32  `json:"relay_all_recipients,omitempty"`
 			Relayhost              *string   `json:"relayhost,omitempty"`
-			Rl                     *bool     `json:"rl,omitempty"`
 			Tags                   *[]string `json:"tags,omitempty"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

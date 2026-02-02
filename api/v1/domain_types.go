@@ -36,6 +36,10 @@ type DomainSpec struct {
 	MaxQuota     int64  `json:"maxQuota"`
 	DefQuota     int64  `json:"defQuota"`
 	MaxMailboxes int64  `json:"maxMailboxes"`
+	RateLimit    *int   `json:"rateLimit,omitempty"`
+	// +kubebuilder:validation:Enum:=h;s;m;d
+	// +kubebuilder:default:=h
+	RateLimitFrame string `json:"rateLimitFrame,omitempty"`
 
 	// +kubebuilder:default:=true
 	Active *bool `json:"active,omitempty"`

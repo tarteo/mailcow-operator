@@ -63,6 +63,16 @@ spec:
               quota:
                 format: int64
                 type: integer
+              rateLimit:
+                type: integer
+              rateLimitFrame:
+                default: h
+                enum:
+                - h
+                - s
+                - m
+                - d
+                type: string
             required:
             - defQuota
             - domain

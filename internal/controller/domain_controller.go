@@ -98,6 +98,15 @@ func (r *DomainReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 		return ctrl.Result{}, err
 	}
 
+	// Remove finalizer if deletion timestamp is set
+	if !domain.ObjectMeta.DeletionTimestamp.IsZero() && controllerutil.ContainsFinalizer(&domain, constants.Finalizer) {
+		controllerutil.RemoveFinalizer(&domain, constants.Finalizer)
+		if err := r.Update(ctx, &domain); err != nil {
+			log.Error(err, "unable to update domain with finalizer")
+			return ctrl.Result{}, err
+		}
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -119,13 +128,6 @@ func (r *DomainReconciler) ReconcileResource(ctx context.Context, client *mailco
 				log.Error(err, "unable to delete domain")
 				return err
 			}
-		}
-
-		// Remove finalizer
-		controllerutil.RemoveFinalizer(domain, constants.Finalizer)
-		if err := r.Update(ctx, domain); err != nil {
-			log.Error(err, "unable to update domain with finalizer")
-			return err
 		}
 		return nil
 	}

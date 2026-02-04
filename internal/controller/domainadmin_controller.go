@@ -97,6 +97,15 @@ func (r *DomainAdminReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{}, err
 	}
 
+	// Remove finalizer if deletion timestamp is set
+	if !domainadmin.ObjectMeta.DeletionTimestamp.IsZero() && controllerutil.ContainsFinalizer(&domainadmin, constants.Finalizer) {
+		controllerutil.RemoveFinalizer(&domainadmin, constants.Finalizer)
+		if err := r.Update(ctx, &domainadmin); err != nil {
+			log.Error(err, "unable to update domainadmin with finalizer")
+			return ctrl.Result{}, err
+		}
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -141,13 +150,6 @@ func (r *DomainAdminReconciler) ReconcileResource(ctx context.Context, client *m
 				log.Error(err, "unable to delete domainadmin")
 				return err
 			}
-		}
-
-		// Remove finalizer
-		controllerutil.RemoveFinalizer(domainadmin, constants.Finalizer)
-		if err := r.Update(ctx, domainadmin); err != nil {
-			log.Error(err, "unable to update domainadmin with finalizer")
-			return err
 		}
 		return nil
 	}

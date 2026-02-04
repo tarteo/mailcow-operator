@@ -96,6 +96,15 @@ func (r *AliasReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return ctrl.Result{}, err
 	}
 
+	// Remove finalizer if deletion timestamp is set
+	if !alias.ObjectMeta.DeletionTimestamp.IsZero() && controllerutil.ContainsFinalizer(&alias, constants.Finalizer) {
+		controllerutil.RemoveFinalizer(&alias, constants.Finalizer)
+		if err := r.Update(ctx, &alias); err != nil {
+			log.Error(err, "unable to update alias with finalizer")
+			return ctrl.Result{}, err
+		}
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -122,13 +131,6 @@ func (r *AliasReconciler) ReconcileResource(ctx context.Context, client *mailcow
 				log.Error(err, "unable to delete alias")
 				return err
 			}
-		}
-
-		// Remove finalizer
-		controllerutil.RemoveFinalizer(alias, constants.Finalizer)
-		if err := r.Update(ctx, alias); err != nil {
-			log.Error(err, "unable to update alias with finalizer")
-			return err
 		}
 		return nil
 	}

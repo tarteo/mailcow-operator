@@ -97,6 +97,15 @@ func (r *MailboxReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{}, err
 	}
 
+	// Remove finalizer if deletion timestamp is set
+	if !mailbox.ObjectMeta.DeletionTimestamp.IsZero() && controllerutil.ContainsFinalizer(&mailbox, constants.Finalizer) {
+		controllerutil.RemoveFinalizer(&mailbox, constants.Finalizer)
+		if err := r.Update(ctx, &mailbox); err != nil {
+			log.Error(err, "unable to update mailbox with finalizer")
+			return ctrl.Result{}, err
+		}
+	}
+
 	return ctrl.Result{}, nil
 }
 
@@ -121,13 +130,6 @@ func (r *MailboxReconciler) ReconcileResource(ctx context.Context, client *mailc
 				log.Error(err, "unable to delete mailbox")
 				return err
 			}
-		}
-
-		// Remove finalizer
-		controllerutil.RemoveFinalizer(mailbox, constants.Finalizer)
-		if err := r.Update(ctx, mailbox); err != nil {
-			log.Error(err, "unable to update mailbox with finalizer")
-			return err
 		}
 		return nil
 	}

@@ -74,6 +74,9 @@ func (r *DomainAdminReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			log.Error(err, "unable to update domainadmin with finalizer")
 			return ctrl.Result{}, err
 		}
+
+		// Return and requeue to get fresh object
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	// Get related mailcow resource

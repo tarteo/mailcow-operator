@@ -75,6 +75,9 @@ func (r *DomainReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			log.Error(err, "unable to update domain with finalizer")
 			return ctrl.Result{}, err
 		}
+
+		// Return and requeue to get fresh object
+		return ctrl.Result{Requeue: true}, nil
 	}
 
 	// Get related mailcow resource

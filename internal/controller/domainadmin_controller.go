@@ -20,6 +20,7 @@ import (
 	"context"
 
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -29,7 +30,7 @@ import (
 
 	mailcowv1 "github.com/tarteo/mailcow-operator/api/v1"
 	constants "github.com/tarteo/mailcow-operator/common"
-	"github.com/tarteo/mailcow-operator/helpers"
+	helpers "github.com/tarteo/mailcow-operator/helpers"
 	"github.com/tarteo/mailcow-operator/mailcow"
 )
 
@@ -195,4 +196,22 @@ func (r *DomainAdminReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		For(&mailcowv1.DomainAdmin{}).
 		Named("domainadmin").
 		Complete(r)
+}
+
+func (r *DomainAdminReconciler) setProgressing(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, message string) error {
+	helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Progressing", metav1.ConditionTrue, "Reconciling", message, domainadmin.Generation)
+	domainadmin.Status.Phase = "Progressing"
+	return r.Status().Update(ctx, domainadmin)
+}
+
+func (r *DomainAdminReconciler) setReady(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, reason, message string) error {
+	helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Ready", metav1.ConditionTrue, reason, message, domainadmin.Generation)
+	domainadmin.Status.Phase = "Ready"
+	return r.Status().Update(ctx, domainadmin)
+}
+
+func (r *DomainAdminReconciler) setDegraded(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, reason, message string) error {
+	helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Degraded", metav1.ConditionTrue, reason, message, domainadmin.Generation)
+	domainadmin.Status.Phase = "Degraded"
+	return r.Status().Update(ctx, domainadmin)
 }

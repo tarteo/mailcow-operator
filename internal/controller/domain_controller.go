@@ -283,3 +283,21 @@ func (r *DomainReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Named("domain").
 		Complete(r)
 }
+
+func (r *DomainReconciler) setProgressing(ctx context.Context, domain *mailcowv1.Domain, message string) error {
+	helpers.SetConditionStatus(&domain.Status.Conditions, "Progressing", metav1.ConditionTrue, "Reconciling", message, domain.Generation)
+	domain.Status.Phase = "Progressing"
+	return r.Status().Update(ctx, domain)
+}
+
+func (r *DomainReconciler) setReady(ctx context.Context, domain *mailcowv1.Domain, reason, message string) error {
+	helpers.SetConditionStatus(&domain.Status.Conditions, "Ready", metav1.ConditionTrue, reason, message, domain.Generation)
+	domain.Status.Phase = "Ready"
+	return r.Status().Update(ctx, domain)
+}
+
+func (r *DomainReconciler) setDegraded(ctx context.Context, domain *mailcowv1.Domain, reason, message string) error {
+	helpers.SetConditionStatus(&domain.Status.Conditions, "Degraded", metav1.ConditionTrue, reason, message, domain.Generation)
+	domain.Status.Phase = "Degraded"
+	return r.Status().Update(ctx, domain)
+}

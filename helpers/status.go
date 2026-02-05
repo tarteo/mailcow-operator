@@ -14,7 +14,7 @@ func SetConditionStatus(conditions *[]metav1.Condition, conditionType string, re
 	// Set the active condition
 	// If it already exists, only update if generation has changed
 	if statusCondition := meta.FindStatusCondition(*conditions, conditionType); statusCondition != nil {
-		if statusCondition.ObservedGeneration != generation {
+		if statusCondition.ObservedGeneration != generation || statusCondition.Message != message {
 			changed = meta.SetStatusCondition(conditions, metav1.Condition{
 				Type:               conditionType,
 				Status:             metav1.ConditionTrue,

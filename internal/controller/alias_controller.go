@@ -91,7 +91,7 @@ func (r *AliasReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	if err := r.ReconcileResource(ctx, &alias); err != nil {
 		log.Error(err, "unable to reconcile mailcow alias")
 		// Set degraded status
-		if _, errStatus := r.setDegraded(ctx, &alias, "ReconcileFailed", err.Error()); errStatus != nil {
+		if _, errStatus := r.setDegraded(ctx, &alias, err.Error()); errStatus != nil {
 			log.Error(errStatus, "unable to set degraded status")
 			return ctrl.Result{}, errStatus
 		}
@@ -216,8 +216,8 @@ func (r *AliasReconciler) setReady(ctx context.Context, alias *mailcowv1.Alias, 
 	return changed, r.Status().Update(ctx, alias)
 }
 
-func (r *AliasReconciler) setDegraded(ctx context.Context, alias *mailcowv1.Alias, reason, message string) (bool, error) {
-	changed := helpers.SetConditionStatus(&alias.Status.Conditions, "Degraded", reason, message, alias.Generation)
+func (r *AliasReconciler) setDegraded(ctx context.Context, alias *mailcowv1.Alias, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&alias.Status.Conditions, "Degraded", "ReconcileFailed", message, alias.Generation)
 	if !changed {
 		return changed, nil
 	}

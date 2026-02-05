@@ -91,7 +91,7 @@ func (r *DomainAdminReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	if err := r.ReconcileResource(ctx, &domainadmin); err != nil {
 		log.Error(err, "unable to reconcile mailcow domainadmin")
 		// Set degraded status
-		if _, errStatus := r.setDegraded(ctx, &domainadmin, "ReconcileFailed", err.Error()); errStatus != nil {
+		if _, errStatus := r.setDegraded(ctx, &domainadmin, err.Error()); errStatus != nil {
 			log.Error(errStatus, "unable to set degraded status")
 			return ctrl.Result{}, errStatus
 		}
@@ -244,8 +244,8 @@ func (r *DomainAdminReconciler) setReady(ctx context.Context, domainadmin *mailc
 	return changed, r.Status().Update(ctx, domainadmin)
 }
 
-func (r *DomainAdminReconciler) setDegraded(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, reason, message string) (bool, error) {
-	changed := helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Degraded", reason, message, domainadmin.Generation)
+func (r *DomainAdminReconciler) setDegraded(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Degraded", "ReconcileFailed", message, domainadmin.Generation)
 	if !changed {
 		return changed, nil
 	}

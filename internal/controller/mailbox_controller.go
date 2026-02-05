@@ -91,7 +91,7 @@ func (r *MailboxReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	if err := r.ReconcileResource(ctx, &mailbox); err != nil {
 		log.Error(err, "unable to reconcile mailcow mailbox")
 		// Set degraded status
-		if _, errStatus := r.setDegraded(ctx, &mailbox, "ReconcileFailed", err.Error()); errStatus != nil {
+		if _, errStatus := r.setDegraded(ctx, &mailbox, err.Error()); errStatus != nil {
 			log.Error(errStatus, "unable to set degraded status")
 			return ctrl.Result{}, errStatus
 		}
@@ -230,8 +230,8 @@ func (r *MailboxReconciler) setReady(ctx context.Context, mailbox *mailcowv1.Mai
 	return changed, r.Status().Update(ctx, mailbox)
 }
 
-func (r *MailboxReconciler) setDegraded(ctx context.Context, mailbox *mailcowv1.Mailbox, reason, message string) (bool, error) {
-	changed := helpers.SetConditionStatus(&mailbox.Status.Conditions, "Degraded", reason, message, mailbox.Generation)
+func (r *MailboxReconciler) setDegraded(ctx context.Context, mailbox *mailcowv1.Mailbox, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&mailbox.Status.Conditions, "Degraded", "ReconcileFailed", message, mailbox.Generation)
 	if !changed {
 		return changed, nil
 	}

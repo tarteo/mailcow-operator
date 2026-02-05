@@ -189,20 +189,29 @@ func (r *MailboxReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *MailboxReconciler) setProgressing(ctx context.Context, mailbox *mailcowv1.Mailbox, message string) error {
-	helpers.SetConditionStatus(&mailbox.Status.Conditions, "Progressing", "Reconciling", message, mailbox.Generation)
+func (r *MailboxReconciler) setProgressing(ctx context.Context, mailbox *mailcowv1.Mailbox, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&mailbox.Status.Conditions, "Progressing", "Reconciling", message, mailbox.Generation)
 	mailbox.Status.Phase = "Progressing"
-	return r.Status().Update(ctx, mailbox)
+	if changed {
+		return changed, r.Status().Update(ctx, mailbox)
+	}
+	return changed, nil
 }
 
-func (r *MailboxReconciler) setReady(ctx context.Context, mailbox *mailcowv1.Mailbox, reason, message string) error {
-	helpers.SetConditionStatus(&mailbox.Status.Conditions, "Ready", reason, message, mailbox.Generation)
+func (r *MailboxReconciler) setReady(ctx context.Context, mailbox *mailcowv1.Mailbox, reason, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&mailbox.Status.Conditions, "Ready", reason, message, mailbox.Generation)
 	mailbox.Status.Phase = "Ready"
-	return r.Status().Update(ctx, mailbox)
+	if changed {
+		return changed, r.Status().Update(ctx, mailbox)
+	}
+	return changed, nil
 }
 
-func (r *MailboxReconciler) setDegraded(ctx context.Context, mailbox *mailcowv1.Mailbox, reason, message string) error {
-	helpers.SetConditionStatus(&mailbox.Status.Conditions, "Degraded", reason, message, mailbox.Generation)
+func (r *MailboxReconciler) setDegraded(ctx context.Context, mailbox *mailcowv1.Mailbox, reason, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&mailbox.Status.Conditions, "Degraded", reason, message, mailbox.Generation)
 	mailbox.Status.Phase = "Degraded"
-	return r.Status().Update(ctx, mailbox)
+	if changed {
+		return changed, r.Status().Update(ctx, mailbox)
+	}
+	return changed, nil
 }

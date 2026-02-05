@@ -203,21 +203,29 @@ func (r *DomainAdminReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *DomainAdminReconciler) setProgressing(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, message string) error {
-	helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Progressing", "Reconciling", message, domainadmin.Generation)
+func (r *DomainAdminReconciler) setProgressing(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Progressing", "Reconciling", message, domainadmin.Generation)
 	domainadmin.Status.Phase = "Progressing"
-	return r.Status().Update(ctx, domainadmin)
-
+	if changed {
+		return changed, r.Status().Update(ctx, domainadmin)
+	}
+	return changed, nil
 }
 
-func (r *DomainAdminReconciler) setReady(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, reason, message string) error {
-	helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Ready", reason, message, domainadmin.Generation)
+func (r *DomainAdminReconciler) setReady(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, reason, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Ready", reason, message, domainadmin.Generation)
 	domainadmin.Status.Phase = "Ready"
-	return r.Status().Update(ctx, domainadmin)
+	if changed {
+		return changed, r.Status().Update(ctx, domainadmin)
+	}
+	return changed, nil
 }
 
-func (r *DomainAdminReconciler) setDegraded(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, reason, message string) error {
-	helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Degraded", reason, message, domainadmin.Generation)
+func (r *DomainAdminReconciler) setDegraded(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, reason, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Degraded", reason, message, domainadmin.Generation)
 	domainadmin.Status.Phase = "Degraded"
-	return r.Status().Update(ctx, domainadmin)
+	if changed {
+		return changed, r.Status().Update(ctx, domainadmin)
+	}
+	return changed, nil
 }

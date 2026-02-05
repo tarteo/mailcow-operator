@@ -176,20 +176,29 @@ func (r *AliasReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *AliasReconciler) setProgressing(ctx context.Context, alias *mailcowv1.Alias, message string) error {
-	helpers.SetConditionStatus(&alias.Status.Conditions, "Progressing", "Reconciling", message, alias.Generation)
+func (r *AliasReconciler) setProgressing(ctx context.Context, alias *mailcowv1.Alias, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&alias.Status.Conditions, "Progressing", "Reconciling", message, alias.Generation)
 	alias.Status.Phase = "Progressing"
-	return r.Status().Update(ctx, alias)
+	if changed {
+		return changed, r.Status().Update(ctx, alias)
+	}
+	return changed, nil
 }
 
-func (r *AliasReconciler) setReady(ctx context.Context, alias *mailcowv1.Alias, reason, message string) error {
-	helpers.SetConditionStatus(&alias.Status.Conditions, "Ready", reason, message, alias.Generation)
+func (r *AliasReconciler) setReady(ctx context.Context, alias *mailcowv1.Alias, reason, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&alias.Status.Conditions, "Ready", reason, message, alias.Generation)
 	alias.Status.Phase = "Ready"
-	return r.Status().Update(ctx, alias)
+	if changed {
+		return changed, r.Status().Update(ctx, alias)
+	}
+	return changed, nil
 }
 
-func (r *AliasReconciler) setDegraded(ctx context.Context, alias *mailcowv1.Alias, reason, message string) error {
-	helpers.SetConditionStatus(&alias.Status.Conditions, "Degraded", reason, message, alias.Generation)
+func (r *AliasReconciler) setDegraded(ctx context.Context, alias *mailcowv1.Alias, reason, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&alias.Status.Conditions, "Degraded", reason, message, alias.Generation)
 	alias.Status.Phase = "Degraded"
-	return r.Status().Update(ctx, alias)
+	if changed {
+		return changed, r.Status().Update(ctx, alias)
+	}
+	return changed, nil
 }

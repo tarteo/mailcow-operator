@@ -290,20 +290,29 @@ func (r *DomainReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Complete(r)
 }
 
-func (r *DomainReconciler) setProgressing(ctx context.Context, domain *mailcowv1.Domain, message string) error {
-	helpers.SetConditionStatus(&domain.Status.Conditions, "Progressing", "Reconciling", message, domain.Generation)
+func (r *DomainReconciler) setProgressing(ctx context.Context, domain *mailcowv1.Domain, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&domain.Status.Conditions, "Progressing", "Reconciling", message, domain.Generation)
 	domain.Status.Phase = "Progressing"
-	return r.Status().Update(ctx, domain)
+	if changed {
+		return changed, r.Status().Update(ctx, domain)
+	}
+	return changed, nil
 }
 
-func (r *DomainReconciler) setReady(ctx context.Context, domain *mailcowv1.Domain, reason, message string) error {
-	helpers.SetConditionStatus(&domain.Status.Conditions, "Ready", reason, message, domain.Generation)
+func (r *DomainReconciler) setReady(ctx context.Context, domain *mailcowv1.Domain, reason, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&domain.Status.Conditions, "Ready", reason, message, domain.Generation)
 	domain.Status.Phase = "Ready"
-	return r.Status().Update(ctx, domain)
+	if changed {
+		return changed, r.Status().Update(ctx, domain)
+	}
+	return changed, nil
 }
 
-func (r *DomainReconciler) setDegraded(ctx context.Context, domain *mailcowv1.Domain, reason, message string) error {
-	helpers.SetConditionStatus(&domain.Status.Conditions, "Degraded", reason, message, domain.Generation)
+func (r *DomainReconciler) setDegraded(ctx context.Context, domain *mailcowv1.Domain, reason, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&domain.Status.Conditions, "Degraded", reason, message, domain.Generation)
 	domain.Status.Phase = "Degraded"
-	return r.Status().Update(ctx, domain)
+	if changed {
+		return changed, r.Status().Update(ctx, domain)
+	}
+	return changed, nil
 }

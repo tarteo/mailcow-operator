@@ -199,28 +199,28 @@ func (r *AliasReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *AliasReconciler) setProgressing(ctx context.Context, alias *mailcowv1.Alias, message string) (bool, error) {
-	changed := helpers.SetConditionStatus(&alias.Status.Conditions, "Progressing", "Reconciling", message, alias.Generation)
+	changed := helpers.SetConditionStatus(&alias.Status.Conditions, constants.ConditionProgressing, "Reconciling", message, alias.Generation)
 	if !changed {
 		return changed, nil
 	}
-	alias.Status.Phase = "Progressing"
+	alias.Status.Phase = constants.ConditionProgressing
 	return changed, r.Status().Update(ctx, alias)
 }
 
 func (r *AliasReconciler) setReady(ctx context.Context, alias *mailcowv1.Alias, message string) (bool, error) {
-	changed := helpers.SetConditionStatus(&alias.Status.Conditions, "Ready", "Reconciled", message, alias.Generation)
+	changed := helpers.SetConditionStatus(&alias.Status.Conditions, constants.ConditionReady, "Reconciled", message, alias.Generation)
 	if !changed {
 		return changed, nil
 	}
-	alias.Status.Phase = "Ready"
+	alias.Status.Phase = constants.ConditionReady
 	return changed, r.Status().Update(ctx, alias)
 }
 
 func (r *AliasReconciler) setDegraded(ctx context.Context, alias *mailcowv1.Alias, message string) (bool, error) {
-	changed := helpers.SetConditionStatus(&alias.Status.Conditions, "Degraded", "ReconcileFailed", message, alias.Generation)
+	changed := helpers.SetConditionStatus(&alias.Status.Conditions, constants.ConditionDegraded, "ReconcileFailed", message, alias.Generation)
 	if !changed {
 		return changed, nil
 	}
-	alias.Status.Phase = "Degraded"
+	alias.Status.Phase = constants.ConditionDegraded
 	return changed, r.Status().Update(ctx, alias)
 }

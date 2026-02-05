@@ -8,9 +8,9 @@ import (
 // SetConditionStatus updates a condition while preserving reason/message of other conditions.
 // It sets the specified condition to the given status and reason/message,
 // and sets all other standard conditions (Ready, Progressing, Degraded) to False while preserving their existing reason/message.
-func SetConditionStatus(conditions *[]metav1.Condition, conditionType string, reason, message string, generation int64) {
+func SetConditionStatus(conditions *[]metav1.Condition, conditionType string, reason, message string, generation int64) bool {
 	// Set the active condition
-	meta.SetStatusCondition(conditions, metav1.Condition{
+	changed := meta.SetStatusCondition(conditions, metav1.Condition{
 		Type:               conditionType,
 		Status:             metav1.ConditionTrue,
 		Reason:             reason,
@@ -34,4 +34,5 @@ func SetConditionStatus(conditions *[]metav1.Condition, conditionType string, re
 			})
 		}
 	}
+	return changed
 }

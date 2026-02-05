@@ -20,7 +20,6 @@ import (
 	"context"
 
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -78,20 +77,7 @@ func (r *AliasReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return ctrl.Result{Requeue: true}, nil
 	}
 
-	// Get related mailcow resource
-	var res mailcowv1.Mailcow
-	if err := r.Get(ctx, types.NamespacedName{Name: alias.Spec.Mailcow, Namespace: alias.Namespace}, &res); err != nil {
-		log.Error(err, "unable to find related mailcow resource", "mailcow", alias.Spec.Mailcow)
-		return ctrl.Result{}, err
-	}
-
-	// Reconcile mailcow alias
-	mailcowClient, err := res.GetClient(ctx, r)
-	if err != nil {
-		log.Error(err, "unable to create mailcow client")
-		return ctrl.Result{}, err
-	}
-	if err := r.ReconcileResource(ctx, mailcowClient, &alias); err != nil {
+	if err := r.ReconcileResource(ctx, &alias); err != nil {
 		log.Error(err, "unable to reconcile mailcow alias")
 		return ctrl.Result{}, err
 	}
@@ -103,14 +89,30 @@ func (r *AliasReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 			log.Error(err, "unable to update alias with finalizer")
 			return ctrl.Result{}, err
 		}
+
+		return ctrl.Result{}, nil
 	}
 
 	return ctrl.Result{}, nil
 }
 
-func (r *AliasReconciler) ReconcileResource(ctx context.Context, client *mailcow.ClientWithResponses, alias *mailcowv1.Alias) error {
+func (r *AliasReconciler) ReconcileResource(ctx context.Context, alias *mailcowv1.Alias) error {
 	log := log.FromContext(ctx).WithValues("namespace", types.NamespacedName{Namespace: alias.Namespace, Name: alias.Name})
 	var err error
+
+	// Get related mailcow resource
+	var res mailcowv1.Mailcow
+	if err := r.Get(ctx, types.NamespacedName{Name: alias.Spec.Mailcow, Namespace: alias.Namespace}, &res); err != nil {
+		log.Error(err, "unable to find related mailcow resource", "mailcow", alias.Spec.Mailcow)
+		return err
+	}
+
+	// Reconcile mailcow alias
+	client, err := res.GetClient(ctx, r)
+	if err != nil {
+		log.Error(err, "unable to create mailcow client")
+		return err
+	}
 
 	// Get alias to check if this address exists
 	// When mailcow has no aliases for this address, this returns an empty object, not an empty array. That's why we don't use the WithResponse function here and unmarshall it ourselves.

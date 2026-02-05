@@ -20,7 +20,6 @@ import (
 	"context"
 
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -79,20 +78,7 @@ func (r *DomainAdminReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return ctrl.Result{Requeue: true}, nil
 	}
 
-	// Get related mailcow resource
-	var res mailcowv1.Mailcow
-	if err := r.Get(ctx, types.NamespacedName{Name: domainadmin.Spec.Mailcow, Namespace: domainadmin.Namespace}, &res); err != nil {
-		log.Error(err, "unable to find related mailcow resource", "mailcow", domainadmin.Spec.Mailcow)
-		return ctrl.Result{}, err
-	}
-
-	// Reconcile mailcow domainadmin
-	mailcowClient, err := res.GetClient(ctx, r)
-	if err != nil {
-		log.Error(err, "unable to create mailcow client")
-		return ctrl.Result{}, err
-	}
-	if err := r.ReconcileResource(ctx, mailcowClient, &domainadmin); err != nil {
+	if err := r.ReconcileResource(ctx, &domainadmin); err != nil {
 		log.Error(err, "unable to reconcile mailcow domainadmin")
 		return ctrl.Result{}, err
 	}
@@ -109,9 +95,23 @@ func (r *DomainAdminReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	return ctrl.Result{}, nil
 }
 
-func (r *DomainAdminReconciler) ReconcileResource(ctx context.Context, client *mailcow.ClientWithResponses, domainadmin *mailcowv1.DomainAdmin) error {
+func (r *DomainAdminReconciler) ReconcileResource(ctx context.Context, domainadmin *mailcowv1.DomainAdmin) error {
 	log := log.FromContext(ctx).WithValues("namespace", types.NamespacedName{Namespace: domainadmin.Namespace, Name: domainadmin.Name})
 	var err error
+
+	// Get related mailcow resource
+	var res mailcowv1.Mailcow
+	if err := r.Get(ctx, types.NamespacedName{Name: domainadmin.Spec.Mailcow, Namespace: domainadmin.Namespace}, &res); err != nil {
+		log.Error(err, "unable to find related mailcow resource", "mailcow", domainadmin.Spec.Mailcow)
+		return err
+	}
+
+	// Create mailcow client
+	client, err := res.GetClient(ctx, r)
+	if err != nil {
+		log.Error(err, "unable to create mailcow client")
+		return err
+	}
 
 	// Get all domain admins to check if this user exists
 	// When mailcow has no domain admins, this returns an empty object, not an empty array. That why we don't use the WithResponse function here and Unmarshall it ourselves.
@@ -207,6 +207,7 @@ func (r *DomainAdminReconciler) setProgressing(ctx context.Context, domainadmin 
 	helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Progressing", "Reconciling", message, domainadmin.Generation)
 	domainadmin.Status.Phase = "Progressing"
 	return r.Status().Update(ctx, domainadmin)
+
 }
 
 func (r *DomainAdminReconciler) setReady(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, reason, message string) error {

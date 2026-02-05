@@ -78,20 +78,7 @@ func (r *MailboxReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 		return ctrl.Result{Requeue: true}, nil
 	}
 
-	// Get related mailcow resource
-	var res mailcowv1.Mailcow
-	if err := r.Get(ctx, types.NamespacedName{Name: mailbox.Spec.Mailcow, Namespace: mailbox.Namespace}, &res); err != nil {
-		log.Error(err, "unable to find related mailcow resource", "mailcow", mailbox.Spec.Mailcow)
-		return ctrl.Result{}, err
-	}
-
-	// Reconcile mailcow mailbox
-	mailcowClient, err := res.GetClient(ctx, r)
-	if err != nil {
-		log.Error(err, "unable to create mailcow client")
-		return ctrl.Result{}, err
-	}
-	if err := r.ReconcileResource(ctx, mailcowClient, &mailbox); err != nil {
+	if err := r.ReconcileResource(ctx, &mailbox); err != nil {
 		log.Error(err, "unable to reconcile mailcow mailbox")
 		return ctrl.Result{}, err
 	}
@@ -108,9 +95,23 @@ func (r *MailboxReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	return ctrl.Result{}, nil
 }
 
-func (r *MailboxReconciler) ReconcileResource(ctx context.Context, client *mailcow.ClientWithResponses, mailbox *mailcowv1.Mailbox) error {
+func (r *MailboxReconciler) ReconcileResource(ctx context.Context, mailbox *mailcowv1.Mailbox) error {
 	log := log.FromContext(ctx).WithValues("namespace", types.NamespacedName{Namespace: mailbox.Namespace, Name: mailbox.Name})
 	var err error
+
+	// Get related mailcow resource
+	var res mailcowv1.Mailcow
+	if err := r.Get(ctx, types.NamespacedName{Name: mailbox.Spec.Mailcow, Namespace: mailbox.Namespace}, &res); err != nil {
+		log.Error(err, "unable to find related mailcow resource", "mailcow", mailbox.Spec.Mailcow)
+		return err
+	}
+
+	// Create mailcow client
+	client, err := res.GetClient(ctx, r)
+	if err != nil {
+		log.Error(err, "unable to create mailcow client")
+		return err
+	}
 
 	// Construct the full email address
 	email := mailbox.Spec.LocalPart + "@" + mailbox.Spec.Domain

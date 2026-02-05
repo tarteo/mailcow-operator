@@ -67,19 +67,34 @@ func (r *MailboxReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 	}
 
 	// Apply finalizer
-	if mailbox.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(&mailbox, constants.Finalizer) {
-		controllerutil.AddFinalizer(&mailbox, constants.Finalizer)
-		if err := r.Update(ctx, &mailbox); err != nil {
-			log.Error(err, "unable to update mailbox with finalizer")
-			return ctrl.Result{}, err
-		}
+	if mailbox.ObjectMeta.DeletionTimestamp.IsZero() {
+		if !controllerutil.ContainsFinalizer(&mailbox, constants.Finalizer) {
+			controllerutil.AddFinalizer(&mailbox, constants.Finalizer)
+			if err := r.Update(ctx, &mailbox); err != nil {
+				log.Error(err, "unable to update mailbox with finalizer")
+				return ctrl.Result{}, err
+			}
 
-		// Return and requeue to get fresh object
-		return ctrl.Result{Requeue: true}, nil
+			// Return and requeue to get fresh object
+			return ctrl.Result{Requeue: true}, nil
+		}
+		// Set progressing status
+		if changed, err := r.setProgressing(ctx, &mailbox, "Reconciling mailbox"); err != nil {
+			log.Error(err, "unable to set progressing status")
+			return ctrl.Result{}, err
+		} else if changed {
+			// Requeue to get fresh object with updated status
+			return ctrl.Result{Requeue: true}, nil
+		}
 	}
 
 	if err := r.ReconcileResource(ctx, &mailbox); err != nil {
 		log.Error(err, "unable to reconcile mailcow mailbox")
+		// Set degraded status
+		if _, errStatus := r.setDegraded(ctx, &mailbox, "ReconcileFailed", err.Error()); errStatus != nil {
+			log.Error(errStatus, "unable to set degraded status")
+			return ctrl.Result{}, errStatus
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -90,6 +105,14 @@ func (r *MailboxReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ct
 			log.Error(err, "unable to update mailbox with finalizer")
 			return ctrl.Result{}, err
 		}
+
+		return ctrl.Result{}, nil
+	}
+
+	// Set ready status
+	if _, err := r.setReady(ctx, &mailbox, "Mailbox successfully reconciled"); err != nil {
+		log.Error(err, "unable to set ready status")
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

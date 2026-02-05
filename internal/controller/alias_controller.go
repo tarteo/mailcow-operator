@@ -66,20 +66,35 @@ func (r *AliasReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 	}
 
 	// Apply finalizer
-	if alias.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(&alias, constants.Finalizer) {
-		controllerutil.AddFinalizer(&alias, constants.Finalizer)
-		if err := r.Update(ctx, &alias); err != nil {
-			log.Error(err, "unable to update alias with finalizer")
-			return ctrl.Result{}, err
-		}
+	if alias.ObjectMeta.DeletionTimestamp.IsZero() {
+		if !controllerutil.ContainsFinalizer(&alias, constants.Finalizer) {
+			controllerutil.AddFinalizer(&alias, constants.Finalizer)
+			if err := r.Update(ctx, &alias); err != nil {
+				log.Error(err, "unable to update alias with finalizer")
+				return ctrl.Result{}, err
+			}
 
-		// Return and requeue to get fresh object
-		return ctrl.Result{Requeue: true}, nil
+			// Return and requeue to get fresh object
+			return ctrl.Result{Requeue: true}, nil
+		}
+		// Set progressing status
+		if changed, err := r.setProgressing(ctx, &alias, "Reconciling alias"); err != nil {
+			log.Error(err, "unable to set progressing status")
+			return ctrl.Result{}, err
+		} else if changed {
+			// Requeue to get fresh object with updated status
+			return ctrl.Result{Requeue: true}, nil
+		}
 	}
 
 	// Reconcile the resource
 	if err := r.ReconcileResource(ctx, &alias); err != nil {
 		log.Error(err, "unable to reconcile mailcow alias")
+		// Set degraded status
+		if _, errStatus := r.setDegraded(ctx, &alias, "ReconcileFailed", err.Error()); errStatus != nil {
+			log.Error(errStatus, "unable to set degraded status")
+			return ctrl.Result{}, errStatus
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -92,6 +107,12 @@ func (r *AliasReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		}
 
 		return ctrl.Result{}, nil
+	}
+
+	// Set ready status
+	if _, err := r.setReady(ctx, &alias, "Alias successfully reconciled"); err != nil {
+		log.Error(err, "unable to set ready status")
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

@@ -161,7 +161,6 @@ oapi-codegen --config=mailcow/oapi-codegen.yaml mailcow/openapi.yaml
 
 ## Roadmap
 
-- Update status conditions
 - Add more controllers for other mailcow resources
 - Add e2e tests
 - Allow multiple goto addresses in aliases
@@ -169,3 +168,5 @@ oapi-codegen --config=mailcow/oapi-codegen.yaml mailcow/openapi.yaml
 - Add an option to force the password of mailbox resources to be updated on each reconciliation according to the secret
 - Add an option to force the password and name of mailboxes to be updated on each reconciliation according to the secret and spec
 - Add support for multiple mailcow versions
+- Update status of mailboxes (quota used, etc.)
+- Update status of domains (number of mailboxes, etc.)

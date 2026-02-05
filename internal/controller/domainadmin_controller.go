@@ -67,19 +67,34 @@ func (r *DomainAdminReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	// Apply finalizer
-	if domainadmin.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(&domainadmin, constants.Finalizer) {
-		controllerutil.AddFinalizer(&domainadmin, constants.Finalizer)
-		if err := r.Update(ctx, &domainadmin); err != nil {
-			log.Error(err, "unable to update domainadmin with finalizer")
-			return ctrl.Result{}, err
-		}
+	if domainadmin.ObjectMeta.DeletionTimestamp.IsZero() {
+		if !controllerutil.ContainsFinalizer(&domainadmin, constants.Finalizer) {
+			controllerutil.AddFinalizer(&domainadmin, constants.Finalizer)
+			if err := r.Update(ctx, &domainadmin); err != nil {
+				log.Error(err, "unable to update domainadmin with finalizer")
+				return ctrl.Result{}, err
+			}
 
-		// Return and requeue to get fresh object
-		return ctrl.Result{Requeue: true}, nil
+			// Return and requeue to get fresh object
+			return ctrl.Result{Requeue: true}, nil
+		}
+		// Set progressing status
+		if changed, err := r.setProgressing(ctx, &domainadmin, "Reconciling domainadmin"); err != nil {
+			log.Error(err, "unable to set progressing status")
+			return ctrl.Result{}, err
+		} else if changed {
+			// Requeue to get fresh object with updated status
+			return ctrl.Result{Requeue: true}, nil
+		}
 	}
 
 	if err := r.ReconcileResource(ctx, &domainadmin); err != nil {
 		log.Error(err, "unable to reconcile mailcow domainadmin")
+		// Set degraded status
+		if _, errStatus := r.setDegraded(ctx, &domainadmin, "ReconcileFailed", err.Error()); errStatus != nil {
+			log.Error(errStatus, "unable to set degraded status")
+			return ctrl.Result{}, errStatus
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -90,6 +105,14 @@ func (r *DomainAdminReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			log.Error(err, "unable to update domainadmin with finalizer")
 			return ctrl.Result{}, err
 		}
+
+		return ctrl.Result{}, nil
+	}
+
+	// Set ready status
+	if _, err := r.setReady(ctx, &domainadmin, "DomainAdmin successfully reconciled"); err != nil {
+		log.Error(err, "unable to set ready status")
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil

@@ -2,10 +2,10 @@ apiVersion: v1
 entries:
   mailcow-operator:
   - apiVersion: v2
-    appVersion: v1.2.0
-    created: "2026-02-03T08:17:04.27085411Z"
+    appVersion: v1.3.0
+    created: "2026-02-05T20:03:49.468696793Z"
     description: Kubernetes Operator for Mailcow objects
-    digest: cbafaf0dc873d3a5f471ad9d6f7532ca1ba03fec8913c6721a37b2d0dee78f8c
+    digest: 8ae37ed3ed0d6ad3822de7453802e220bc3f4a2e0b3430f3e4750e704df6160e
     name: mailcow-operator
     type: application
     urls:
@@ -13,7 +13,7 @@ entries:
     version: 1.1.0
   - apiVersion: v2
     appVersion: v1.0.0
-    created: "2026-02-03T08:17:04.270425593Z"
+    created: "2026-02-05T20:03:49.468170587Z"
     description: Kubernetes Operator for Mailcow objects
     digest: 5e90d34e27866e880e9bcee1903cf5feefb99b8c88514a15e0986f3f0859e3f7
     name: mailcow-operator
@@ -21,4 +21,4 @@ entries:
     urls:
     - https://tarteo.github.io/mailcow-operator/mailcow-operator-1.0.0.tgz
     version: 1.0.0
-generated: "2026-02-03T08:17:04.269784922Z"
+generated: "2026-02-05T20:03:49.467494493Z"

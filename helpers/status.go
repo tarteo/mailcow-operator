@@ -7,8 +7,15 @@ import (
 
 // SetConditionStatus updates a condition while preserving reason/message of other conditions.
 // It sets the specified condition to the given status and reason/message,
-// and sets all other standard conditions (Ready, Progressing, Degraded) to False while preserving their existing reason/message.
-func SetConditionStatus(conditions *[]metav1.Condition, conditionType string, reason, message string, generation int64) bool {
+// and sets all other standard conditions (Ready, Progressing, Degraded) to False while preserving
+// their existing reason/message.
+func SetConditionStatus(
+	conditions *[]metav1.Condition,
+	conditionType string,
+	reason,
+	message string,
+	generation int64,
+) bool {
 	changed := false
 
 	// Set the active condition

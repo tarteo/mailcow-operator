@@ -175,19 +175,19 @@ func (r *AliasReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *AliasReconciler) setProgressing(ctx context.Context, alias *mailcowv1.Alias, message string) error {
-	helpers.SetConditionStatus(&alias.Status.Conditions, "Progressing", metav1.ConditionTrue, "Reconciling", message, alias.Generation)
+	helpers.SetConditionStatus(&alias.Status.Conditions, "Progressing", "Reconciling", message, alias.Generation)
 	alias.Status.Phase = "Progressing"
 	return r.Status().Update(ctx, alias)
 }
 
 func (r *AliasReconciler) setReady(ctx context.Context, alias *mailcowv1.Alias, reason, message string) error {
-	helpers.SetConditionStatus(&alias.Status.Conditions, "Ready", metav1.ConditionTrue, reason, message, alias.Generation)
+	helpers.SetConditionStatus(&alias.Status.Conditions, "Ready", reason, message, alias.Generation)
 	alias.Status.Phase = "Ready"
 	return r.Status().Update(ctx, alias)
 }
 
 func (r *AliasReconciler) setDegraded(ctx context.Context, alias *mailcowv1.Alias, reason, message string) error {
-	helpers.SetConditionStatus(&alias.Status.Conditions, "Degraded", metav1.ConditionTrue, reason, message, alias.Generation)
+	helpers.SetConditionStatus(&alias.Status.Conditions, "Degraded", reason, message, alias.Generation)
 	alias.Status.Phase = "Degraded"
 	return r.Status().Update(ctx, alias)
 }

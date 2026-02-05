@@ -20,7 +20,6 @@ import (
 	"context"
 
 	"k8s.io/apimachinery/pkg/api/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -190,19 +189,19 @@ func (r *MailboxReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *MailboxReconciler) setProgressing(ctx context.Context, mailbox *mailcowv1.Mailbox, message string) error {
-	helpers.SetConditionStatus(&mailbox.Status.Conditions, "Progressing", metav1.ConditionTrue, "Reconciling", message, mailbox.Generation)
+	helpers.SetConditionStatus(&mailbox.Status.Conditions, "Progressing", "Reconciling", message, mailbox.Generation)
 	mailbox.Status.Phase = "Progressing"
 	return r.Status().Update(ctx, mailbox)
 }
 
 func (r *MailboxReconciler) setReady(ctx context.Context, mailbox *mailcowv1.Mailbox, reason, message string) error {
-	helpers.SetConditionStatus(&mailbox.Status.Conditions, "Ready", metav1.ConditionTrue, reason, message, mailbox.Generation)
+	helpers.SetConditionStatus(&mailbox.Status.Conditions, "Ready", reason, message, mailbox.Generation)
 	mailbox.Status.Phase = "Ready"
 	return r.Status().Update(ctx, mailbox)
 }
 
 func (r *MailboxReconciler) setDegraded(ctx context.Context, mailbox *mailcowv1.Mailbox, reason, message string) error {
-	helpers.SetConditionStatus(&mailbox.Status.Conditions, "Degraded", metav1.ConditionTrue, reason, message, mailbox.Generation)
+	helpers.SetConditionStatus(&mailbox.Status.Conditions, "Degraded", reason, message, mailbox.Generation)
 	mailbox.Status.Phase = "Degraded"
 	return r.Status().Update(ctx, mailbox)
 }

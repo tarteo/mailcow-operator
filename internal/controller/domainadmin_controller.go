@@ -204,19 +204,19 @@ func (r *DomainAdminReconciler) SetupWithManager(mgr ctrl.Manager) error {
 }
 
 func (r *DomainAdminReconciler) setProgressing(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, message string) error {
-	helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Progressing", metav1.ConditionTrue, "Reconciling", message, domainadmin.Generation)
+	helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Progressing", "Reconciling", message, domainadmin.Generation)
 	domainadmin.Status.Phase = "Progressing"
 	return r.Status().Update(ctx, domainadmin)
 }
 
 func (r *DomainAdminReconciler) setReady(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, reason, message string) error {
-	helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Ready", metav1.ConditionTrue, reason, message, domainadmin.Generation)
+	helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Ready", reason, message, domainadmin.Generation)
 	domainadmin.Status.Phase = "Ready"
 	return r.Status().Update(ctx, domainadmin)
 }
 
 func (r *DomainAdminReconciler) setDegraded(ctx context.Context, domainadmin *mailcowv1.DomainAdmin, reason, message string) error {
-	helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Degraded", metav1.ConditionTrue, reason, message, domainadmin.Generation)
+	helpers.SetConditionStatus(&domainadmin.Status.Conditions, "Degraded", reason, message, domainadmin.Generation)
 	domainadmin.Status.Phase = "Degraded"
 	return r.Status().Update(ctx, domainadmin)
 }

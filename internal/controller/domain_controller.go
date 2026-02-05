@@ -69,19 +69,34 @@ func (r *DomainReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 	}
 
 	// Apply finalizer
-	if domain.ObjectMeta.DeletionTimestamp.IsZero() && !controllerutil.ContainsFinalizer(&domain, constants.Finalizer) {
-		controllerutil.AddFinalizer(&domain, constants.Finalizer)
-		if err := r.Update(ctx, &domain); err != nil {
-			log.Error(err, "unable to update domain with finalizer")
-			return ctrl.Result{}, err
-		}
+	if domain.ObjectMeta.DeletionTimestamp.IsZero() {
+		if !controllerutil.ContainsFinalizer(&domain, constants.Finalizer) {
+			controllerutil.AddFinalizer(&domain, constants.Finalizer)
+			if err := r.Update(ctx, &domain); err != nil {
+				log.Error(err, "unable to update domain with finalizer")
+				return ctrl.Result{}, err
+			}
 
-		// Return and requeue to get fresh object
-		return ctrl.Result{Requeue: true}, nil
+			// Return and requeue to get fresh object
+			return ctrl.Result{Requeue: true}, nil
+		}
+		// Set progressing status
+		if changed, err := r.setProgressing(ctx, &domain, "Reconciling domain"); err != nil {
+			log.Error(err, "unable to set progressing status")
+			return ctrl.Result{}, err
+		} else if changed {
+			// Requeue to get fresh object with updated status
+			return ctrl.Result{Requeue: true}, nil
+		}
 	}
 
 	if err := r.ReconcileResource(ctx, &domain); err != nil {
 		log.Error(err, "unable to reconcile mailcow domain")
+		// Set degraded status
+		if _, errStatus := r.setDegraded(ctx, &domain, "ReconcileFailed", err.Error()); errStatus != nil {
+			log.Error(errStatus, "unable to set degraded status")
+			return ctrl.Result{}, errStatus
+		}
 		return ctrl.Result{}, err
 	}
 
@@ -92,6 +107,14 @@ func (r *DomainReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctr
 			log.Error(err, "unable to update domain with finalizer")
 			return ctrl.Result{}, err
 		}
+
+		return ctrl.Result{}, nil
+	}
+
+	// Set ready status
+	if _, err := r.setReady(ctx, &domain, "Domain successfully reconciled"); err != nil {
+		log.Error(err, "unable to set ready status")
+		return ctrl.Result{}, err
 	}
 
 	return ctrl.Result{}, nil
@@ -292,27 +315,27 @@ func (r *DomainReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func (r *DomainReconciler) setProgressing(ctx context.Context, domain *mailcowv1.Domain, message string) (bool, error) {
 	changed := helpers.SetConditionStatus(&domain.Status.Conditions, "Progressing", "Reconciling", message, domain.Generation)
-	domain.Status.Phase = "Progressing"
-	if changed {
-		return changed, r.Status().Update(ctx, domain)
+	if !changed {
+		return changed, nil
 	}
-	return changed, nil
+	domain.Status.Phase = "Progressing"
+	return changed, r.Status().Update(ctx, domain)
 }
 
-func (r *DomainReconciler) setReady(ctx context.Context, domain *mailcowv1.Domain, reason, message string) (bool, error) {
-	changed := helpers.SetConditionStatus(&domain.Status.Conditions, "Ready", reason, message, domain.Generation)
-	domain.Status.Phase = "Ready"
-	if changed {
-		return changed, r.Status().Update(ctx, domain)
+func (r *DomainReconciler) setReady(ctx context.Context, domain *mailcowv1.Domain, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&domain.Status.Conditions, "Ready", "Reconciled", message, domain.Generation)
+	if !changed {
+		return changed, nil
 	}
-	return changed, nil
+	domain.Status.Phase = "Ready"
+	return changed, r.Status().Update(ctx, domain)
 }
 
 func (r *DomainReconciler) setDegraded(ctx context.Context, domain *mailcowv1.Domain, reason, message string) (bool, error) {
 	changed := helpers.SetConditionStatus(&domain.Status.Conditions, "Degraded", reason, message, domain.Generation)
-	domain.Status.Phase = "Degraded"
-	if changed {
-		return changed, r.Status().Update(ctx, domain)
+	if !changed {
+		return changed, nil
 	}
-	return changed, nil
+	domain.Status.Phase = "Degraded"
+	return changed, r.Status().Update(ctx, domain)
 }

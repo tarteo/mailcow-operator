@@ -191,27 +191,27 @@ func (r *MailboxReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func (r *MailboxReconciler) setProgressing(ctx context.Context, mailbox *mailcowv1.Mailbox, message string) (bool, error) {
 	changed := helpers.SetConditionStatus(&mailbox.Status.Conditions, "Progressing", "Reconciling", message, mailbox.Generation)
-	mailbox.Status.Phase = "Progressing"
-	if changed {
-		return changed, r.Status().Update(ctx, mailbox)
+	if !changed {
+		return changed, nil
 	}
-	return changed, nil
+	mailbox.Status.Phase = "Progressing"
+	return changed, r.Status().Update(ctx, mailbox)
 }
 
-func (r *MailboxReconciler) setReady(ctx context.Context, mailbox *mailcowv1.Mailbox, reason, message string) (bool, error) {
-	changed := helpers.SetConditionStatus(&mailbox.Status.Conditions, "Ready", reason, message, mailbox.Generation)
-	mailbox.Status.Phase = "Ready"
-	if changed {
-		return changed, r.Status().Update(ctx, mailbox)
+func (r *MailboxReconciler) setReady(ctx context.Context, mailbox *mailcowv1.Mailbox, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&mailbox.Status.Conditions, "Ready", "Reconciled", message, mailbox.Generation)
+	if !changed {
+		return changed, nil
 	}
-	return changed, nil
+	mailbox.Status.Phase = "Ready"
+	return changed, r.Status().Update(ctx, mailbox)
 }
 
 func (r *MailboxReconciler) setDegraded(ctx context.Context, mailbox *mailcowv1.Mailbox, reason, message string) (bool, error) {
 	changed := helpers.SetConditionStatus(&mailbox.Status.Conditions, "Degraded", reason, message, mailbox.Generation)
-	mailbox.Status.Phase = "Degraded"
-	if changed {
-		return changed, r.Status().Update(ctx, mailbox)
+	if !changed {
+		return changed, nil
 	}
-	return changed, nil
+	mailbox.Status.Phase = "Degraded"
+	return changed, r.Status().Update(ctx, mailbox)
 }

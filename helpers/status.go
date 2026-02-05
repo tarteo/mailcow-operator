@@ -9,14 +9,29 @@ import (
 // It sets the specified condition to the given status and reason/message,
 // and sets all other standard conditions (Ready, Progressing, Degraded) to False while preserving their existing reason/message.
 func SetConditionStatus(conditions *[]metav1.Condition, conditionType string, reason, message string, generation int64) bool {
+	changed := false
+
 	// Set the active condition
-	changed := meta.SetStatusCondition(conditions, metav1.Condition{
-		Type:               conditionType,
-		Status:             metav1.ConditionTrue,
-		Reason:             reason,
-		Message:            message,
-		ObservedGeneration: generation,
-	})
+	// If it already exists, only update if generation has changed
+	if statusCondition := meta.FindStatusCondition(*conditions, conditionType); statusCondition != nil {
+		if statusCondition.ObservedGeneration != generation {
+			changed = meta.SetStatusCondition(conditions, metav1.Condition{
+				Type:               conditionType,
+				Status:             metav1.ConditionTrue,
+				Reason:             reason,
+				Message:            message,
+				ObservedGeneration: generation,
+			})
+		}
+	} else {
+		changed = meta.SetStatusCondition(conditions, metav1.Condition{
+			Type:               conditionType,
+			Status:             metav1.ConditionTrue,
+			Reason:             reason,
+			Message:            message,
+			ObservedGeneration: generation,
+		})
+	}
 
 	// Set other conditions to False, preserving their reason/message
 	otherTypes := []string{"Ready", "Progressing", "Degraded"}
@@ -30,7 +45,7 @@ func SetConditionStatus(conditions *[]metav1.Condition, conditionType string, re
 				Status:             metav1.ConditionFalse,
 				Reason:             cond.Reason,
 				Message:            cond.Message,
-				ObservedGeneration: generation,
+				ObservedGeneration: cond.ObservedGeneration,
 			})
 		}
 	}

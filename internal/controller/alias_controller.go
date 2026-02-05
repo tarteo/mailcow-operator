@@ -77,6 +77,7 @@ func (r *AliasReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl
 		return ctrl.Result{Requeue: true}, nil
 	}
 
+	// Reconcile the resource
 	if err := r.ReconcileResource(ctx, &alias); err != nil {
 		log.Error(err, "unable to reconcile mailcow alias")
 		return ctrl.Result{}, err
@@ -178,27 +179,27 @@ func (r *AliasReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 func (r *AliasReconciler) setProgressing(ctx context.Context, alias *mailcowv1.Alias, message string) (bool, error) {
 	changed := helpers.SetConditionStatus(&alias.Status.Conditions, "Progressing", "Reconciling", message, alias.Generation)
-	alias.Status.Phase = "Progressing"
-	if changed {
-		return changed, r.Status().Update(ctx, alias)
+	if !changed {
+		return changed, nil
 	}
-	return changed, nil
+	alias.Status.Phase = "Progressing"
+	return changed, r.Status().Update(ctx, alias)
 }
 
-func (r *AliasReconciler) setReady(ctx context.Context, alias *mailcowv1.Alias, reason, message string) (bool, error) {
-	changed := helpers.SetConditionStatus(&alias.Status.Conditions, "Ready", reason, message, alias.Generation)
-	alias.Status.Phase = "Ready"
-	if changed {
-		return changed, r.Status().Update(ctx, alias)
+func (r *AliasReconciler) setReady(ctx context.Context, alias *mailcowv1.Alias, message string) (bool, error) {
+	changed := helpers.SetConditionStatus(&alias.Status.Conditions, "Ready", "Reconciled", message, alias.Generation)
+	if !changed {
+		return changed, nil
 	}
-	return changed, nil
+	alias.Status.Phase = "Ready"
+	return changed, r.Status().Update(ctx, alias)
 }
 
 func (r *AliasReconciler) setDegraded(ctx context.Context, alias *mailcowv1.Alias, reason, message string) (bool, error) {
 	changed := helpers.SetConditionStatus(&alias.Status.Conditions, "Degraded", reason, message, alias.Generation)
-	alias.Status.Phase = "Degraded"
-	if changed {
-		return changed, r.Status().Update(ctx, alias)
+	if !changed {
+		return changed, nil
 	}
-	return changed, nil
+	alias.Status.Phase = "Degraded"
+	return changed, r.Status().Update(ctx, alias)
 }

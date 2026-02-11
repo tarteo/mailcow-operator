@@ -32,6 +32,7 @@ rules:
   - domainadmins
   - domains
   - mailboxes
+  - mailcows
   verbs:
   - create
   - delete
@@ -47,6 +48,7 @@ rules:
   - domainadmins/finalizers
   - domains/finalizers
   - mailboxes/finalizers
+  - mailcows/finalizers
   verbs:
   - update
 - apiGroups:
@@ -56,6 +58,7 @@ rules:
   - domainadmins/status
   - domains/status
   - mailboxes/status
+  - mailcows/status
   verbs:
   - get
   - patch

@@ -12,3 +12,7 @@ spec:
     key: password
   quota: 500
   active: true
+  sogoAccess: false
+  senderACL:
+    - "default"
+    - "example.com"  # Allow sending from the same domain 

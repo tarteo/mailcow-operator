@@ -337,7 +337,7 @@ type EditMailboxAttr struct {
 	Quota *float32 `json:"quota,omitempty"`
 
 	// SenderAcl list of allowed send from addresses
-	SenderAcl *map[string]interface{} `json:"sender_acl,omitempty"`
+	SenderAcl *[]string `json:"sender_acl,omitempty"`
 
 	// SogoAccess is access to SOGo webmail active or not
 	SogoAccess *bool `json:"sogo_access,omitempty"`
@@ -10342,7 +10342,6 @@ type GetMailboxesResponse struct {
 		PercentInUse *int      `json:"percent_in_use,omitempty"`
 		Quota        *int      `json:"quota,omitempty"`
 		QuotaUsed    *int      `json:"quota_used,omitempty"`
-		Rl           *bool     `json:"rl,omitempty"`
 		SpamAliases  *int      `json:"spam_aliases,omitempty"`
 		Tags         *[]string `json:"tags,omitempty"`
 		Username     *string   `json:"username,omitempty"`
@@ -15124,7 +15123,6 @@ func ParseGetMailboxesResponse(rsp *http.Response) (*GetMailboxesResponse, error
 			PercentInUse *int      `json:"percent_in_use,omitempty"`
 			Quota        *int      `json:"quota,omitempty"`
 			QuotaUsed    *int      `json:"quota_used,omitempty"`
-			Rl           *bool     `json:"rl,omitempty"`
 			SpamAliases  *int      `json:"spam_aliases,omitempty"`
 			Tags         *[]string `json:"tags,omitempty"`
 			Username     *string   `json:"username,omitempty"`

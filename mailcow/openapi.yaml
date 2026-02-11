@@ -219,7 +219,9 @@ components:
           type: number
         sender_acl:
           description: list of allowed send from addresses
-          type: object
+          type: array
+          items:
+            type: string
         sogo_access:
           description: is access to SOGo webmail active or not
           type: boolean
@@ -5174,8 +5176,6 @@ paths:
                     type: integer
                   quota_used:
                     type: integer
-                  rl:
-                    type: boolean
                   spam_aliases:
                     type: integer
                   username:

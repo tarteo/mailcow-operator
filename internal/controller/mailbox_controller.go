@@ -190,7 +190,9 @@ func (r *MailboxReconciler) ReconcileResource(ctx context.Context, mailbox *mail
 				// Password2:     &password,
 				Active: mailbox.Spec.Active,
 				// ForcePwUpdate: mailbox.Spec.ForcePasswordChange,
-				Quota: helpers.Int64ToFloat32(mailbox.Spec.Quota),
+				Quota:      helpers.Int64ToFloat32(mailbox.Spec.Quota),
+				SogoAccess: mailbox.Spec.SogoAccess,
+				SenderAcl:  mailbox.Spec.SenderACL,
 			},
 			Items: &[]string{email},
 		})

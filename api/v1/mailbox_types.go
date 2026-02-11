@@ -51,6 +51,9 @@ type MailboxSpec struct {
 	// +kubebuilder:default:=false
 	ForcePasswordChange *bool  `json:"forcePasswordChange,omitempty"`
 	Quota               *int64 `json:"quota,omitempty"`
+	// +kubebuilder:default:=true
+	SogoAccess *bool     `json:"sogoAccess,omitempty"`
+	SenderACL  *[]string `json:"senderACL,omitempty"`
 }
 
 // MailboxStatus defines the observed state of Mailbox.

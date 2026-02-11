@@ -132,6 +132,10 @@ deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in
 undeploy: kustomize ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	$(KUSTOMIZE) build config/default | $(KUBECTL) delete --ignore-not-found=$(ignore-not-found) -f -
 
+.PHONY: generate-openapi
+generate-openapi: oapi-codegen ## Generate Go client for mailcow API from OpenAPI specification.
+	$(OAPI_CODEGEN) -config mailcow/oapi-codegen.yaml mailcow/openapi.yaml
+
 ##@ Dependencies
 
 ## Location to install dependencies to
@@ -145,11 +149,14 @@ KUSTOMIZE ?= $(LOCALBIN)/kustomize
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
 GOLANGCI_LINT = $(LOCALBIN)/golangci-lint
 HELMIFY ?= $(LOCALBIN)/helmify
+OAPI_CODEGEN ?= $(LOCALBIN)/oapi-codegen
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v5.5.0
 CONTROLLER_TOOLS_VERSION ?= v0.16.4
 GOLANGCI_LINT_VERSION ?= v1.61.0
+
+OAPI_CODEGEN_VERSION ?= v2.4.1
 
 .PHONY: helmify
 helmify: $(HELMIFY) ## Download helmify locally if necessary.
@@ -173,6 +180,16 @@ $(CONTROLLER_GEN): $(LOCALBIN)
 golangci-lint: $(GOLANGCI_LINT) ## Download golangci-lint locally if necessary.
 $(GOLANGCI_LINT): $(LOCALBIN)
 	$(call go-install-tool,$(GOLANGCI_LINT),github.com/golangci/golangci-lint/cmd/golangci-lint,$(GOLANGCI_LINT_VERSION))
+
+.PHONY: controller-gen
+controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary.
+$(CONTROLLER_GEN): $(LOCALBIN)
+	$(call go-install-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen,$(CONTROLLER_TOOLS_VERSION))
+
+.PHONY: oapi-codegen
+oapi-codegen: $(OAPI_CODEGEN) ## Download oapi-codegen locally if necessary.
+$(OAPI_CODEGEN): $(LOCALBIN)
+	$(call go-install-tool,$(OAPI_CODEGEN),github.com/oapi-codegen/oapi-codegen/v2/cmd/oapi-codegen,$(OAPI_CODEGEN_VERSION))
 
 # go-install-tool will 'go install' any package with custom target and name of binary, if it doesn't exist
 # $1 - target path with name of binary

@@ -85,6 +85,13 @@ spec:
               quota:
                 format: int64
                 type: integer
+              senderACL:
+                items:
+                  type: string
+                type: array
+              sogoAccess:
+                default: true
+                type: boolean
             required:
             - domain
             - localPart

@@ -145,7 +145,7 @@ func (r *AliasReconciler) ReconcileResource(ctx context.Context, alias *mailcowv
 	}
 
 	// Find if the alias already exists
-	var aliasExists bool = response.JSON200 != nil
+	var aliasExists bool = response.JSON200 != nil && response.JSON200.Id != nil
 
 	if !alias.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Handle deletion

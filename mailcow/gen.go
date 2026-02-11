@@ -80,7 +80,7 @@ const (
 
 // Defines values for CreateTLSPolicyMapJSONBodyPolicy.
 const (
-	Dane        CreateTLSPolicyMapJSONBodyPolicy = "dane"
+	Dane        CreateTLSPolicyMapJSONBodyPolicy = "'dane"
 	Encrypt     CreateTLSPolicyMapJSONBodyPolicy = "encrypt"
 	Fingerprint CreateTLSPolicyMapJSONBodyPolicy = "fingerprint"
 	May         CreateTLSPolicyMapJSONBodyPolicy = "may"
@@ -8160,10 +8160,7 @@ type ClientWithResponsesInterface interface {
 type CreateAliasResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		// Log contains request object
-		Log  *[]interface{}      `json:"log,omitempty"`
-		Msg  *[]interface{}      `json:"msg,omitempty"`
+	JSON200      *[]struct {
 		Type *CreateAlias200Type `json:"type,omitempty"`
 	}
 	JSON401 *Unauthorized
@@ -8696,8 +8693,7 @@ func (r CreateTransportMapsResponse) StatusCode() int {
 type DeleteAliasResponse struct {
 	Body         []byte
 	HTTPResponse *http.Response
-	JSON200      *struct {
-		Msg  *[]interface{}      `json:"msg,omitempty"`
+	JSON200      *[]struct {
 		Type *DeleteAlias200Type `json:"type,omitempty"`
 	}
 	JSON401 *Unauthorized
@@ -12259,10 +12255,7 @@ func ParseCreateAliasResponse(rsp *http.Response) (*CreateAliasResponse, error) 
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			// Log contains request object
-			Log  *[]interface{}      `json:"log,omitempty"`
-			Msg  *[]interface{}      `json:"msg,omitempty"`
+		var dest []struct {
 			Type *CreateAlias200Type `json:"type,omitempty"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {
@@ -12968,8 +12961,7 @@ func ParseDeleteAliasResponse(rsp *http.Response) (*DeleteAliasResponse, error) 
 
 	switch {
 	case strings.Contains(rsp.Header.Get("Content-Type"), "json") && rsp.StatusCode == 200:
-		var dest struct {
-			Msg  *[]interface{}      `json:"msg,omitempty"`
+		var dest []struct {
 			Type *DeleteAlias200Type `json:"type,omitempty"`
 		}
 		if err := json.Unmarshal(bodyBytes, &dest); err != nil {

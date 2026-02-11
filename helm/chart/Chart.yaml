@@ -3,7 +3,7 @@ name: mailcow-operator
 description: Kubernetes Operator for Mailcow objects
 type: application
 version: 1.1.0
-appVersion: "v1.3.0"
+appVersion: "v1.4.0"
 home: https://github.com/tarteo/mailcow-operator
 keywords:
   - mailcow

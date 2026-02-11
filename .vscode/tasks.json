@@ -5,11 +5,6 @@
             "label": "install",
             "command": "make",
             "args": ["manifests", "kustomize", "install"]
-        },
-        {
-            "label": "build-push",
-            "command": "make",
-            "args": ["docker-build", "docker-push", "IMG=tarteo/mailcow-operator:1.0.0"]
         }
     ]
 }

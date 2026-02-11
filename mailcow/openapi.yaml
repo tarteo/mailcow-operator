@@ -5170,8 +5170,6 @@ paths:
                     type: string
                   percent_class:
                     type: string
-                  percent_in_use:
-                    type: integer
                   quota:
                     type: integer
                   quota_used:

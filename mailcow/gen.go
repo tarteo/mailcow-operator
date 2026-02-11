@@ -80,7 +80,7 @@ const (
 
 // Defines values for CreateTLSPolicyMapJSONBodyPolicy.
 const (
-	Dane        CreateTLSPolicyMapJSONBodyPolicy = "'dane"
+	Dane        CreateTLSPolicyMapJSONBodyPolicy = "dane"
 	Encrypt     CreateTLSPolicyMapJSONBodyPolicy = "encrypt"
 	Fingerprint CreateTLSPolicyMapJSONBodyPolicy = "fingerprint"
 	May         CreateTLSPolicyMapJSONBodyPolicy = "may"
@@ -10339,7 +10339,6 @@ type GetMailboxesResponse struct {
 		Messages     *int      `json:"messages,omitempty"`
 		Name         *string   `json:"name,omitempty"`
 		PercentClass *string   `json:"percent_class,omitempty"`
-		PercentInUse *int      `json:"percent_in_use,omitempty"`
 		Quota        *int      `json:"quota,omitempty"`
 		QuotaUsed    *int      `json:"quota_used,omitempty"`
 		SpamAliases  *int      `json:"spam_aliases,omitempty"`
@@ -15120,7 +15119,6 @@ func ParseGetMailboxesResponse(rsp *http.Response) (*GetMailboxesResponse, error
 			Messages     *int      `json:"messages,omitempty"`
 			Name         *string   `json:"name,omitempty"`
 			PercentClass *string   `json:"percent_class,omitempty"`
-			PercentInUse *int      `json:"percent_in_use,omitempty"`
 			Quota        *int      `json:"quota,omitempty"`
 			QuotaUsed    *int      `json:"quota_used,omitempty"`
 			SpamAliases  *int      `json:"spam_aliases,omitempty"`

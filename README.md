@@ -18,7 +18,7 @@ Kubernetes operator for managing mailcow resources with Custom Resource Definiti
 
 The Helm chart lives in [helm/chart](helm/chart).
 
-1. Install CRDs and controller:
+Install CRDs and controller:
 
 ```bash
 helm install mailcow-operator ./helm/chart \
@@ -35,7 +35,7 @@ helm install mailcow-operator mailcow-operator/mailcow-operator \
     --create-namespace
 ```
 
-3. Uninstall:
+and to uninstall:
 
 ```bash
 helm uninstall mailcow-operator --namespace mailcow-operator
